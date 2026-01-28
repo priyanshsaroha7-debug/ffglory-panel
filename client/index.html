@@ -57,6 +57,40 @@ document.getElementById("login-btn").addEventListener("click", loginHandler);
 signupForm.addEventListener("submit", signupHandler);
 /* ===== CLEAN AUTH HANDLER END ===== */
 
+
+
+/* ===== FINAL LOGIN FIX ===== */
+const loginForm = document.getElementById("login-form");
+
+loginForm.addEventListener("submit", async (e)=>{
+  e.preventDefault();
+
+  const fd = new FormData(loginForm);
+  const username = fd.get("username");
+  const password = fd.get("password");
+
+  if(!username || !password){ alert("Username or password missing"); return; }
+
+  const res = await fetch(API.login, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password })
+  });
+
+  const data = await res.json();
+  if(!res.ok){ alert(data.message || "Invalid password"); return; }
+
+  localStorage.setItem("token", data.token);
+
+  const me = await fetch(API.me, {
+    headers: { Authorization: "Bearer " + data.token }
+  }).then(r=>r.json());
+
+  currentUser = me.user;
+  showDashboard();
+});
+/* ===== END LOGIN FIX ===== */
+
 </script>
     <!-- Only load Turnstile on production (non-localhost) -->
     <script>
