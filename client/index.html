@@ -8,18 +8,21 @@
     <title>FFGlory Panel</title>
     <script src="https://cdn.tailwindcss.com/3.4.17">
 
-// ===== LOGIN FIX START =====
-const loginForm = document.getElementById("login-form");
-const loginBtn  = document.getElementById("login-btn");
 
-async function doLogin(e){
-  if(e) e.preventDefault();
+
+
+/* ===== CLEAN AUTH HANDLER ===== */
+const loginForm = document.getElementById("login-form");
+const signupForm = document.getElementById("signup-form");
+
+async function loginHandler(e){
+  e.preventDefault();
 
   const username = document.getElementById("login-username").value.trim();
   const password = document.getElementById("login-password").value.trim();
 
   if(!username || !password){
-    alert("Username or password missing");
+    alert("Username / password missing");
     return;
   }
 
@@ -30,10 +33,7 @@ async function doLogin(e){
   });
 
   const data = await res.json();
-  if(!res.ok){
-    alert(data.message || "Invalid password");
-    return;
-  }
+  if(!res.ok){ alert(data.message || "Invalid password"); return; }
 
   localStorage.setItem("token", data.token);
 
@@ -47,9 +47,15 @@ async function doLogin(e){
   showDashboard();
 }
 
-loginForm.addEventListener("submit", doLogin);
-loginBtn.addEventListener("click", doLogin);
-// ===== LOGIN FIX END =====
+async function signupHandler(e){
+  e.preventDefault();
+  alert("Signup disabled on backend (demo mode)");
+}
+
+loginForm.addEventListener("submit", loginHandler);
+document.getElementById("login-btn").addEventListener("click", loginHandler);
+signupForm.addEventListener("submit", signupHandler);
+/* ===== CLEAN AUTH HANDLER END ===== */
 
 </script>
     <!-- Only load Turnstile on production (non-localhost) -->
@@ -4032,69 +4038,6 @@ loginBtn.addEventListener("click", doLogin);
             this.value = this.value.toLowerCase().replace(/[^a-z0-9_]/g, '');
         });
 
-        document.getElementById('signup-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            // Invitation code disabled - use empty string
-            const invitationCode = ''; // document.getElementById('signup-invitation-code').value.toUpperCase().trim();
-            const username = document.getElementById('signup-username').value.toLowerCase();
-            const password = document.getElementById('signup-password').value;
-            const confirmPassword = document.getElementById('signup-confirm-password').value;
-            const loginError = document.getElementById('login-error');
-            const signupSuccess = document.getElementById('signup-success');
-            const signupBtn = document.getElementById('signup-btn');
-
-            // Hide previous messages
-            loginError.classList.add('hidden');
-            signupSuccess.classList.add('hidden');
-
-            // Invitation code validation DISABLED - open registration
-            // if (!invitationCode || invitationCode.length < 8) {
-            //     loginError.textContent = 'Valid invitation code is required';
-            //     loginError.classList.remove('hidden');
-            //     return;
-            // }
-
-            // Validate
-            if (password !== confirmPassword) {
-                loginError.textContent = 'Passwords do not match';
-                loginError.classList.remove('hidden');
-                return;
-            }
-
-            if (password.length < 6) {
-                loginError.textContent = 'Password must be at least 6 characters';
-                loginError.classList.remove('hidden');
-                return;
-            }
-
-            if (!/^[a-z0-9_]+$/.test(username)) {
-                loginError.textContent = 'Username can only contain lowercase letters, numbers, and underscore';
-                loginError.classList.remove('hidden');
-                return;
-            }
-
-            if (!turnstileToken) {
-                loginError.textContent = 'Please complete the robot verification';
-                loginError.classList.remove('hidden');
-                return;
-            }
-
-            // Disable button during request
-            signupBtn.disabled = true;
-            document.getElementById('signup-text').textContent = 'Creating...';
-
-            try {
-                const res = await fetch(API.signup, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        username: username,
-                        password: password,
-                        invitation_code: invitationCode,
-                        turnstile_token: turnstileToken
-                    })
-                });
 
                 const body = await res.json();
 
