@@ -6,7 +6,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FFGlory Panel</title>
-    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script src="https://cdn.tailwindcss.com/3.4.17">
+
+// ===== LOGIN FIX START =====
+const loginForm = document.getElementById("login-form");
+const loginBtn  = document.getElementById("login-btn");
+
+async function doLogin(e){
+  if(e) e.preventDefault();
+
+  const username = document.getElementById("login-username").value.trim();
+  const password = document.getElementById("login-password").value.trim();
+
+  if(!username || !password){
+    alert("Username or password missing");
+    return;
+  }
+
+  const res = await fetch(API.login, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password })
+  });
+
+  const data = await res.json();
+  if(!res.ok){
+    alert(data.message || "Invalid password");
+    return;
+  }
+
+  localStorage.setItem("token", data.token);
+
+  const meRes = await fetch(API.me, {
+    headers: { Authorization: "Bearer " + data.token }
+  });
+
+  const meData = await meRes.json();
+  currentUser = meData.user;
+
+  showDashboard();
+}
+
+loginForm.addEventListener("submit", doLogin);
+loginBtn.addEventListener("click", doLogin);
+// ===== LOGIN FIX END =====
+
+</script>
     <!-- Only load Turnstile on production (non-localhost) -->
     <script>
         if (!window.location.hostname.includes('localhost') && !window.location.hostname.includes('127.0.0.1')) {
@@ -3959,33 +4004,7 @@
             }
         }
 
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            console.log('[Login] Form submitted');
-
-            const formData = new FormData(e.target);
-            const data = Object.fromEntries(formData.entries());
-            console.log('[Login] Form data:', data);
-
-            const loginError = document.getElementById('login-error');
-            const loginBtn = document.getElementById('login-btn');
-            const loginText = document.getElementById('login-text');
-
-            // Hide previous error
-            loginError.classList.add('hidden');
-
-            // Show loading state
-            loginBtn.disabled = true;
-            loginText.textContent = 'Signing in...';
-
-            try {
-                console.log('[Login] Sending fetch to:', API.login);
-                const res = await fetch(API.login, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                console.log('[Login] Response status:', res.status);
+        console.log('[Login] Response status:', res.status);
 
                 if (res.ok) {
                     const body = await res.json();
